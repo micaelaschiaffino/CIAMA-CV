@@ -1,0 +1,162 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Calculadora de Riesgo Cardiovascular - CIAMA</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f4f6f8;
+      color: #333;
+      padding: 2em;
+      text-align: center;
+    }
+    header img {
+      max-width: 180px;
+      margin-bottom: 10px;
+    }
+    input, select, button {
+      margin: 0.5em;
+      padding: 0.5em;
+      width: 80%;
+      max-width: 300px;
+    }
+    #result {
+      margin-top: 1em;
+      font-weight: bold;
+      padding: 1em;
+      border-radius: 10px;
+    }
+    #recomendaciones {
+      margin-top: 2em;
+      text-align: left;
+      max-width: 600px;
+      margin-left: auto;
+      margin-right: auto;
+      background: #fff;
+      padding: 1em;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    #recomendaciones h2 {
+      text-align: center;
+      color: #003366;
+    }
+    .boton {
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      padding: 0.6em 1.2em;
+      cursor: pointer;
+      margin: 10px;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <img src="LogoCiamaPng-Color.png" alt="Logo CIAMA">
+    <h1>Calculadora de Riesgo Cardiovascular - CIAMA</h1>
+    <p>Estimación del riesgo de infarto o ACV en los próximos 10 años y riesgo vitalicio</p>
+  </header>
+
+  <form id="form">
+    <input type="number" id="age" placeholder="Edad (años)" required><br>
+    <select id="sex" required>
+      <option value="">Sexo</option>
+      <option value="M">Masculino</option>
+      <option value="F">Femenino</option>
+    </select><br>
+    <select id="race" required>
+      <option value="">Raza</option>
+      <option value="white">Blanca / Otro</option>
+      <option value="black">Negra</option>
+    </select><br>
+    <input type="number" id="tc" placeholder="Colesterol total (mg/dL)" required><br>
+    <input type="number" id="hdl" placeholder="HDL (colesterol bueno) (mg/dL)" required><br>
+    <input type="number" id="sbp" placeholder="Presión sistólica (mmHg)" required><br>
+    <select id="htn" required>
+      <option value="">¿Toma medicación para la presión?</option>
+      <option value="1">Sí</option>
+      <option value="0">No</option>
+    </select><br>
+    <select id="diabetes" required>
+      <option value="">¿Tiene diabetes?</option>
+      <option value="1">Sí</option>
+      <option value="0">No</option>
+    </select><br>
+    <select id="smoker" required>
+      <option value="">¿Fuma actualmente?</option>
+      <option value="1">Sí</option>
+      <option value="0">No</option>
+    </select><br>
+    <button type="button" class="boton" onclick="calculate()">Calcular Riesgo</button>
+    <button type="button" class="boton" onclick="window.print()">Descargar PDF</button>
+    <a href="https://wa.me/543329524932" class="boton" target="_blank">Contactar por WhatsApp</a>
+  </form>
+  <div id="result"></div>
+  <div id="recomendaciones"></div>
+  <footer>
+    <p style="font-size:0.8em; margin-top:2em; color:gray">* Esta herramienta es informativa y no reemplaza la evaluación médica personalizada.</p>
+  </footer>
+
+  <script>
+    function calculate() {
+      const age = parseInt(document.getElementById('age').value);
+      const sex = document.getElementById('sex').value;
+      const race = document.getElementById('race').value;
+      const tc = parseFloat(document.getElementById('tc').value);
+      const hdl = parseFloat(document.getElementById('hdl').value);
+      const sbp = parseFloat(document.getElementById('sbp').value);
+      const htn = parseInt(document.getElementById('htn').value);
+      const diabetes = parseInt(document.getElementById('diabetes').value);
+      const smoker = parseInt(document.getElementById('smoker').value);
+
+      let risk10 = 0.1 * age + 0.02 * tc - 0.02 * hdl + 0.03 * sbp + 5 * htn + 6 * diabetes + 4 * smoker;
+      let riskLifetime = 10 + 0.1 * age + 0.05 * tc + 3 * smoker + 3 * diabetes;
+      if (sex === 'M') { risk10 += 3; riskLifetime += 2; }
+      if (race === 'black') { risk10 += 1.5; riskLifetime += 1; }
+
+      let color = "", mensaje = "", lista = "";
+      if (risk10 < 7.5) {
+        color = "#28a745";
+        mensaje = `Riesgo bajo a 10 años: ${risk10.toFixed(1)}% | Riesgo vitalicio estimado: ${riskLifetime.toFixed(1)}%`;
+        lista = `
+          <ul>
+            <li>Mantener actividad física regular.</li>
+            <li>Alimentación saludable.</li>
+            <li>Evitar el tabaco y controlar el estrés.</li>
+            <li>Controles médicos periódicos.</li>
+          </ul>`;
+      } else if (risk10 < 20) {
+        color = "#ffc107";
+        mensaje = `Riesgo moderado a 10 años: ${risk10.toFixed(1)}% | Riesgo vitalicio estimado: ${riskLifetime.toFixed(1)}%`;
+        lista = `
+          <ul>
+            <li>Consulta con especialista.</li>
+            <li>Control de presión, lípidos y peso.</li>
+            <li>Evaluar medicación preventiva.</li>
+            <li>Mejorar hábitos de vida.</li>
+          </ul>`;
+      } else {
+        color = "#dc3545";
+        mensaje = `Riesgo alto a 10 años: ${risk10.toFixed(1)}% | Riesgo vitalicio estimado: ${riskLifetime.toFixed(1)}%`;
+        lista = `
+          <ul>
+            <li>Evaluación médica urgente.</li>
+            <li>Inicio de tratamiento específico.</li>
+            <li>Estudios complementarios y control intensivo.</li>
+            <li>Modificar todos los factores de riesgo.</li>
+          </ul>`;
+      }
+
+      document.getElementById('result').innerText = mensaje;
+      document.getElementById('result').style.backgroundColor = color;
+      document.getElementById('result').style.color = "#fff";
+      document.getElementById('recomendaciones').innerHTML = `<h2>Recomendaciones</h2>${lista}`;
+    }
+  </script>
+</body>
+</html>
